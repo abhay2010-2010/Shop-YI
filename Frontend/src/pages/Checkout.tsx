@@ -1,60 +1,146 @@
-import axios from "axios"
-import { useEffect, useState } from "react"
+import React from 'react';
+import { ShoppingCart, Trash2, ArrowLeft, Loader2 } from 'lucide-react';
+import type { CartItem } from '../types'; // Import necessary types
+import { useNavigate } from 'react-router-dom';
 
-import Cart from "../components/Cart"
-import type { CartItem } from "../types"
-
-function Checkout() {
-    const [cart, setCart] = useState<CartItem[]>(() => {
-        return JSON.parse(localStorage.getItem("cart") || "[]")
-    })
-
-    useEffect(() => {
-        localStorage.setItem("cart", JSON.stringify(cart))
-    }, [cart])
-
-    const updateQuantity = (id: number, newQty: number) => {
-        if (newQty <= 0) return
-        setCart((prev) =>
-            prev.map((item) =>
-                item.id === id ? { ...item, quantity: newQty } : item
-            )
-        )
-    }
-
-    const removeFromCart = (id: number) => {
-        setCart((prev) => prev.filter((item) => item.id !== id))
-    }
-
-    const handleCheckout = async () => {
-        try {
-            const res = await axios.post("http://localhost:3000/api/checkout", {
-                items: cart
-            })
-            alert(`✅ ${res.data.message} | Total: $${res.data.total}`)
-            setCart([])
-            localStorage.removeItem("cart")
-        } catch (error) {
-            alert("❌ Checkout failed")
-        }
-    }
-
-    return (
-        <div>
-            <Cart
-                cart={cart}
-                updateQuantity={updateQuantity}
-                removeFromCart={removeFromCart}
-            />
-            {cart.length > 0 && (
-                <button
-                    onClick={handleCheckout}
-                    className="mt-6 px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-                    Checkout
-                </button>
-            )}
-        </div>
-    )
+// 1. Define the Props interface for the Checkout component
+interface Props {
+    cart: CartItem[];
+    updateQuantity: (id: number, newQuantity: number) => void;
+    handleCheckout: () => Promise<void>;
 }
 
-export default Checkout
+// Helper function to format currency
+const formatCurrency = (amount: number): string => {
+    return amount.toFixed(2);
+};
+
+const Checkout: React.FC<Props> = ({ cart, updateQuantity, handleCheckout }) => {
+    const [isProcessing, setIsProcessing] = React.useState(false);
+    const Navigation=useNavigate();
+
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const shipping = subtotal > 1000 ? 0 : 50; // Example: Free shipping over $1000
+    const total = subtotal + shipping;
+
+    const handleCheckoutClick = async () => {
+        setIsProcessing(true);
+        await handleCheckout();
+        setIsProcessing(false);
+        Navigation("/payment")
+    };
+
+    return (
+        <div className="max-w-4xl mx-auto py-8">
+            <h1 className="text-4xl font-extrabold text-gray-900 mb-8 flex items-center">
+                <ShoppingCart className="w-8 h-8 mr-3 text-blue-600" />
+                Your Shopping Cart
+            </h1>
+
+            {cart.length === 0 ? (
+                <div className="text-center p-12 border-2 border-dashed border-gray-300 rounded-xl bg-white shadow-inner">
+                    <p className="text-xl text-gray-600 font-semibold mb-4">Your cart is currently empty!</p>
+                    <p className="text-gray-500">Add some awesome products from the home page to continue shopping.</p>
+                </div>
+            ) : (
+                <div className="grid md:grid-cols-3 gap-8">
+                    {/* Cart Items List */}
+                    <div className="md:col-span-2 space-y-4">
+                        {cart.map((item) => (
+                            <div key={item.id} className="flex items-center bg-white p-4 rounded-xl shadow-md transition-shadow hover:shadow-lg">
+                                <img
+                                    src={item.imageUrl || `https://placehold.co/100x100/A0BFFF/ffffff?text=${item.name}`}
+                                    alt={item.name}
+                                    className="w-20 h-20 object-contain rounded-lg border p-1"
+                                    onError={(e) => { e.currentTarget.src = `https://placehold.co/100x100/A0BFFF/ffffff?text=${item.name}`; }}
+                                />
+                                <div className="flex-grow ml-4">
+                                    <h2 className="font-bold text-gray-900 line-clamp-1">{item.name}</h2>
+                                    <p className="text-sm text-gray-600">${formatCurrency(item.price)} each</p>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    {/* Quantity Controls */}
+                                    <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden">
+                                        <button
+                                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                                            className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                            disabled={isProcessing}
+                                        >
+                                            -
+                                        </button>
+                                        <span className="px-3 py-1 font-semibold text-gray-800 bg-gray-50">{item.quantity}</span>
+                                        <button
+                                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                            className="px-3 py-1 text-gray-600 hover:bg-gray-100 transition-colors disabled:opacity-50"
+                                            disabled={isProcessing}
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+
+                                    {/* Remove Button */}
+                                    <button
+                                        onClick={() => updateQuantity(item.id, 0)}
+                                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50"
+                                        disabled={isProcessing}
+                                        title="Remove item"
+                                    >
+                                        <Trash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Order Summary Card */}
+                    <div className="md:col-span-1 bg-white p-6 rounded-xl shadow-2xl sticky top-28 h-fit border border-gray-100">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b pb-2">Order Summary</h2>
+                        <div className="space-y-3 text-gray-700">
+                            <div className="flex justify-between">
+                                <span>Subtotal ({cart.length} items)</span>
+                                <span className="font-medium">${formatCurrency(subtotal)}</span>
+                            </div>
+                            <div className="flex justify-between">
+                                <span>Shipping & Handling</span>
+                                <span className="font-medium text-green-600">{shipping === 0 ? 'FREE' : `$${formatCurrency(shipping)}`}</span>
+                            </div>
+                            <div className="flex justify-between font-extrabold text-lg pt-2 border-t border-gray-200 text-gray-900">
+                                <span>Order Total</span>
+                                <span>${formatCurrency(total)}</span>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleCheckoutClick}
+                            disabled={isProcessing || cart.length === 0}
+                            className={`w-full mt-6 py-3 rounded-xl font-bold text-white transition-all duration-300 shadow-lg flex items-center justify-center space-x-2 
+                                ${isProcessing || cart.length === 0
+                                    ? 'bg-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl transform hover:-translate-y-0.5'
+                                }`}
+                        >
+                            {isProcessing ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Processing...</span>
+                                </>
+                            ) : (
+                                <span>Proceed to Checkout</span>
+                            )}
+                        </button>
+                         <button
+                            onClick={() => window.history.back()}
+                            className="w-full mt-3 py-2 rounded-xl text-blue-600 border border-blue-600 hover:bg-blue-50 transition-colors flex items-center justify-center space-x-2"
+                        >
+                            <ArrowLeft className="w-4 h-4" />
+                            <span>Continue Shopping</span>
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default Checkout;
