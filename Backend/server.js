@@ -21,7 +21,7 @@ app.use(express.json());
 app.use("/api-docs",swaggerUi.serve , swaggerUi.setup(swaggerSpec));//
 
 app.get('/', (req, res) => {
-  res.send('Hello World! 654654');
+  res.send('Hello World! 654server is running properly');
 });
 
 app.use("/api/products",productrouter);
