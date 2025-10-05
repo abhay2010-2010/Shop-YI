@@ -15,6 +15,7 @@ export const checkout = (req, res) => {
       total += product.price * quantity;
     }
   });
+  
 
   console.log("🛒 New Order:", items);
 
