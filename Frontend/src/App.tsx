@@ -12,6 +12,7 @@ import "./App.css"
 import Payment from "./pages/Payment"
 // import Footer from "./components/Footer"
 
+
 const API_BASE_URL = "https://simple-shopping-cart-bpmz.onrender.com/api"
 
 function App(): React.ReactElement {
