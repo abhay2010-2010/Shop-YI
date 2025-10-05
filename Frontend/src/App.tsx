@@ -10,8 +10,9 @@ import type { CartItem, Product } from "./types" // Assuming types are here
 import "./App.css"
 
 import Payment from "./pages/Payment"
+import Footer from "./components/Footer"
 
-const API_BASE_URL = "http://localhost:5001/api"
+const API_BASE_URL = "https://simple-shopping-cart-bpmz.onrender.com/api"
 
 function App(): React.ReactElement {
     const [products, setProducts] = useState<Product[]>([])
@@ -169,7 +170,7 @@ const updateQuantity = (id: number, newQuantity: number) => {
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-violet-50 to-slate-400">
-            <Navbar cartCount={totalItemsInCart} likedCount={likedIds.length} />
+            <Navbar cartCount={totalItemsInCart} likedCount={likedIds.length}  />
 
             <div className="p-6 pt-24 container mx-auto">
                 <Routes>
@@ -216,6 +217,7 @@ const updateQuantity = (id: number, newQuantity: number) => {
                 </Routes>
                 {/* Products payment Route */}
             </div>
+            {/* <Footer/> */}
         </div>
     )
 }
