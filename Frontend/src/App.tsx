@@ -10,7 +10,7 @@ import type { CartItem, Product } from "./types" // Assuming types are here
 import "./App.css"
 
 import Payment from "./pages/Payment"
-import Footer from "./components/Footer"
+// import Footer from "./components/Footer"
 
 const API_BASE_URL = "https://simple-shopping-cart-bpmz.onrender.com/api"
 
