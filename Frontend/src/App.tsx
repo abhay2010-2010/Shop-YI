@@ -1,16 +1,17 @@
-import React, { useState, useEffect } from 'react'
-import { Route, Routes } from 'react-router-dom'
-import type { CartItem, Product } from './types' // Assuming types are here
+import React, { useEffect, useState } from "react"
+import { Route, Routes } from "react-router-dom"
 
-import Checkout from './pages/Checkout'
-import Home from './pages/Home'
-import Navbar from './components/Navbar'
-import LikedProducts from './pages/LikedProducts'
+import Navbar from "./components/Navbar"
+import Checkout from "./pages/Checkout"
+import Home from "./pages/Home"
+import LikedProducts from "./pages/LikedProducts"
+import type { CartItem, Product } from "./types" // Assuming types are here
 
-import './App.css'
-import Payment from './pages/Payment'
+import "./App.css"
 
-const API_BASE_URL = 'http://localhost:5001/api'
+import Payment from "./pages/Payment"
+
+const API_BASE_URL = "http://localhost:5001/api"
 
 function App(): React.ReactElement {
     const [products, setProducts] = useState<Product[]>([])
@@ -19,21 +20,20 @@ function App(): React.ReactElement {
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
 
-
     useEffect(() => {
-        const savedCart = localStorage.getItem('shoppingCart')
+        const savedCart = localStorage.getItem("shoppingCart")
         if (savedCart) setCart(JSON.parse(savedCart) as CartItem[])
 
-        const savedLikes = localStorage.getItem('likedProducts')
+        const savedLikes = localStorage.getItem("likedProducts")
         if (savedLikes) setLikedIds(JSON.parse(savedLikes) as number[])
     }, [])
 
     useEffect(() => {
-        localStorage.setItem('shoppingCart', JSON.stringify(cart))
+        localStorage.setItem("shoppingCart", JSON.stringify(cart))
     }, [cart])
 
     useEffect(() => {
-        localStorage.setItem('likedProducts', JSON.stringify(likedIds))
+        localStorage.setItem("likedProducts", JSON.stringify(likedIds))
     }, [likedIds])
 
     // === Data Fetching ===
@@ -41,26 +41,32 @@ function App(): React.ReactElement {
         const fetchProducts = async () => {
             try {
                 const response = await fetch(`${API_BASE_URL}/products`)
-                if (!response.ok) throw new Error('Failed to fetch products from API.')
+                if (!response.ok)
+                    throw new Error("Failed to fetch products from API.")
 
+                const responseData: { success: boolean; products: Product[] } =
+                    await response.json()
 
-                const responseData: { success: boolean, products: Product[] } = await response.json()
-
-
-                const productArray = responseData?.products;
-
+                const productArray = responseData?.products
 
                 if (Array.isArray(productArray)) {
                     setProducts(productArray)
                 } else {
-                    console.error('API returned unexpected data structure:', responseData);
-                    setError('The product data returned by the server is corrupted or has an unexpected format.');
-                    setProducts([]);
+                    console.error(
+                        "API returned unexpected data structure:",
+                        responseData
+                    )
+                    setError(
+                        "The product data returned by the server is corrupted or has an unexpected format."
+                    )
+                    setProducts([])
                 }
             } catch (err) {
-                console.error('Fetch error:', err)
-                setError('Could not load products. Please check the backend server.')
-                setProducts([]);
+                console.error("Fetch error:", err)
+                setError(
+                    "Could not load products. Please check the backend server."
+                )
+                setProducts([])
             } finally {
                 setLoading(false)
             }
@@ -68,32 +74,41 @@ function App(): React.ReactElement {
         fetchProducts()
     }, [])
 
-    // === Cart Logic ===
-    const addToCart = (product: Product) => {
-        setCart((prevCart) => {
-            const existingItem = prevCart.find((item) => item.id === product.id)
-            if (existingItem) {
-                return prevCart.map((item) =>
-                    item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
-                )
-            } else {
-                // Ensure all CartItem properties are included when adding a new item
-                return [{ ...product, quantity: 1 }, ...prevCart] as CartItem[]
-            }
-        })
+  // === Cart Logic ===
+const addToCart = (product: Product) => {
+  setCart((prevCart) => {
+    // Find if the product already exists in the cart
+    const existingItemIndex = prevCart.findIndex((item) => item.id === product.id)
+
+    if (existingItemIndex !== -1) {
+      // If product exists → update its quantity (no duplicate item)
+      const updatedCart = [...prevCart]
+      updatedCart[existingItemIndex] = {
+        ...updatedCart[existingItemIndex],
+        quantity: updatedCart[existingItemIndex].quantity + 1,
+      }
+      return updatedCart
+    } else {
+      // If new product → add it once with quantity 1
+      return [{ ...product, quantity: 1 }, ...prevCart] as CartItem[]
+    }
+  })
+}
+
+const updateQuantity = (id: number, newQuantity: number) => {
+  setCart((prevCart) => {
+    // Remove if quantity is 0 or less
+    if (newQuantity <= 0) {
+      return prevCart.filter((item) => item.id !== id)
     }
 
-    const updateQuantity = (id: number, newQuantity: number) => {
-        if (newQuantity <= 0) {
-            setCart((prevCart) => prevCart.filter((item) => item.id !== id))
-        } else {
-            setCart((prevCart) =>
-                prevCart.map((item) =>
-                    item.id === id ? { ...item, quantity: newQuantity } : item
-                )
-            )
-        }
-    }
+    // Update existing product’s quantity (never duplicate)
+    return prevCart.map((item) =>
+      item.id === id ? { ...item, quantity: newQuantity } : item
+    )
+  })
+}
+
 
     // === Like Logic ===
     const toggleLike = (productId: number) => {
@@ -109,38 +124,48 @@ function App(): React.ReactElement {
     // === Checkout Logic ===
     const handleCheckout = async () => {
         if (cart.length === 0) {
-            console.warn('Your cart is empty!')
+            console.warn("Your cart is empty!")
             return
         }
 
         try {
-            const cartItemsToSend = cart.map(({ id, quantity }) => ({ id, quantity }))
+            const cartItemsToSend = cart.map(({ id, quantity }) => ({
+                id,
+                quantity
+            }))
             const response = await fetch(`${API_BASE_URL}/checkout`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ cartItems: cartItemsToSend })
             })
 
-            if (!response.ok) throw new Error('Checkout failed on the server.')
+            if (!response.ok) throw new Error("Checkout failed on the server.")
 
             const result = await response.json()
             console.log(`Checkout successful! Message: ${result.message}`)
             setCart([])
         } catch (err) {
-            console.error('Checkout error:', err)
+            console.error("Checkout error:", err)
         }
     }
 
     const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0)
 
-
     const likedProducts = Array.isArray(products)
-        ? products.filter(p => likedIds.includes(p.id))
-        : [];
+        ? products.filter((p) => likedIds.includes(p.id))
+        : []
 
-    if (loading) return <div className="p-8 text-center text-xl">Loading products...</div>
+    if (loading)
+        return (
+            <div className="p-8 text-center text-xl">Loading products...</div>
+        )
 
-    if (error && products.length === 0) return <div className="p-8 text-center text-red-600 font-bold">{error}</div>
+    if (error && products.length === 0)
+        return (
+            <div className="p-8 text-center text-red-600 font-bold">
+                {error}
+            </div>
+        )
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-violet-50 to-slate-400">
@@ -186,15 +211,8 @@ function App(): React.ReactElement {
                         }
                     />
 
-
                     {/* Home Route */}
-                    <Route
-                        path="/payment"
-                        element={
-                            <Payment
-                            />
-                        }
-                    />
+                    <Route path="/payment" element={<Payment />} />
                 </Routes>
                 {/* Products payment Route */}
             </div>
