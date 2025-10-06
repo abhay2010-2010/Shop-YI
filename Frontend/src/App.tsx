@@ -19,7 +19,6 @@ function App(): React.ReactElement {
     const [products, setProducts] = useState<Product[]>([])
     const [cart, setCart] = useState<CartItem[]>([])
     const [likedIds, setLikedIds] = useState<number[]>([])
-    const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
     const [searchTerm, setSearchTerm] = useState<string>("")
 
