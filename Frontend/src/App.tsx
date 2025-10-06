@@ -10,8 +10,8 @@ import type { CartItem, Product } from "./types" // Assuming types are here
 import "./App.css"
 
 import Payment from "./pages/Payment"
-// import Footer from "./components/Footer"
 
+// import Footer from "./components/Footer"
 
 const API_BASE_URL = "https://simple-shopping-cart-bpmz.onrender.com/api"
 
@@ -77,38 +77,37 @@ function App(): React.ReactElement {
         fetchProducts()
     }, [])
 
-  // === Cart Logic ===
-const addToCart = (product: Product) => {
-  setCart((prevCart) => {
-    const existingItem = prevCart.find((item) => item.id === product.id);
-    if (existingItem) {
-      // If product already exists → only increase its quantity
-      return prevCart.map((item) =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      );
-    } else {
-      // If product doesn’t exist → add it
-      return [...prevCart, { ...product, quantity: 1 }] as CartItem[];
-    }
-  });
-};
-
-const updateQuantity = (id: number, newQuantity: number) => {
-  setCart((prevCart) => {
-    // Remove if quantity is 0 or less
-    if (newQuantity <= 0) {
-      return prevCart.filter((item) => item.id !== id)
+    // === Cart Logic ===
+    const addToCart = (product: Product) => {
+        setCart((prevCart) => {
+            const existingItem = prevCart.find((item) => item.id === product.id)
+            if (existingItem) {
+                // If product already exists → only increase its quantity
+                return prevCart.map((item) =>
+                    item.id === product.id
+                        ? { ...item, quantity: item.quantity + 1 }
+                        : item
+                )
+            } else {
+                // If product doesn’t exist → add it
+                return [...prevCart, { ...product, quantity: 1 }] as CartItem[]
+            }
+        })
     }
 
-    // Update existing product’s quantity (never duplicate)
-    return prevCart.map((item) =>
-      item.id === id ? { ...item, quantity: newQuantity } : item
-    )
-  })
-}
+    const updateQuantity = (id: number, newQuantity: number) => {
+        setCart((prevCart) => {
+            // Remove if quantity is 0 or less
+            if (newQuantity <= 0) {
+                return prevCart.filter((item) => item.id !== id)
+            }
 
+            // Update existing product’s quantity (never duplicate)
+            return prevCart.map((item) =>
+                item.id === id ? { ...item, quantity: newQuantity } : item
+            )
+        })
+    }
 
     // === Like Logic ===
     const toggleLike = (productId: number) => {
@@ -149,14 +148,14 @@ const updateQuantity = (id: number, newQuantity: number) => {
         }
     }
 
-const totalItemsInCart = cart.length;
-const filteredProducts=products.filter((p)=> p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const totalItemsInCart = cart.length
+    const filteredProducts = products.filter((p) =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
     const likedProducts = Array.isArray(products)
         ? products.filter((p) => likedIds.includes(p.id))
         : []
-
-   
 
     if (error && products.length === 0)
         return (
@@ -167,7 +166,12 @@ const filteredProducts=products.filter((p)=> p.name.toLowerCase().includes(searc
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-violet-50 to-slate-400">
-            <Navbar cartCount={totalItemsInCart} likedCount={likedIds.length} searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+            <Navbar
+                cartCount={totalItemsInCart}
+                likedCount={likedIds.length}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+            />
 
             <div className="p-6 pt-24 container mx-auto">
                 <Routes>
