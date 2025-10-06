@@ -69,9 +69,7 @@ function App(): React.ReactElement {
                     "Could not load products. Please check the backend server."
                 )
                 setProducts([])
-            } finally {
-                setLoading(false)
-            }
+            } 
         }
         fetchProducts()
     }, [])
