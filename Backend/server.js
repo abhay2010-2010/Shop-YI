@@ -1,8 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-// import productrouter from "./src/routes/product.routes.js";
-// import checkoutrouter from "./src/routes/checkout.routes.js";
 dotenv.config();
 
 import { swaggerUi, swaggerSpec } from "./swagger.js";
@@ -21,7 +19,7 @@ app.use(express.json());
 app.use("/api-docs",swaggerUi.serve , swaggerUi.setup(swaggerSpec));//
 
 app.get('/', (req, res) => {
-  res.send('Hello World! 654server is running properly');
+  res.send('server is running properly');
 });
 
 app.use("/api/products",productrouter);

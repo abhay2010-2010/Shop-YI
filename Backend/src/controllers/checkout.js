@@ -1,8 +1,10 @@
 import products from "../data/product.js";
 
 export const checkout = (req, res) => {
-  const { items } = req.body;
+  const { cartItems } = req.body;
+console.log(cartItems);
 
+  const items = cartItems;
   if (!items || !Array.isArray(items)) {
     return res.status(400).json({ success: false, message: "Invalid cart data" });
   }
