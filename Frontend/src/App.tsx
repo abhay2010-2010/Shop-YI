@@ -80,23 +80,20 @@ function App(): React.ReactElement {
   // === Cart Logic ===
 const addToCart = (product: Product) => {
   setCart((prevCart) => {
-    // Find if the product already exists in the cart
-    const existingItemIndex = prevCart.findIndex((item) => item.id === product.id)
-
-    if (existingItemIndex !== -1) {
-      // If product exists → update its quantity (no duplicate item)
-      const updatedCart = [...prevCart]
-      updatedCart[existingItemIndex] = {
-        ...updatedCart[existingItemIndex],
-        quantity: updatedCart[existingItemIndex].quantity + 1,
-      }
-      return updatedCart
+    const existingItem = prevCart.find((item) => item.id === product.id);
+    if (existingItem) {
+      // If product already exists → only increase its quantity
+      return prevCart.map((item) =>
+        item.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+      );
     } else {
-      // If new product → add it once with quantity 1
-      return [{ ...product, quantity: 1 }, ...prevCart] as CartItem[]
+      // If product doesn’t exist → add it
+      return [...prevCart, { ...product, quantity: 1 }] as CartItem[];
     }
-  })
-}
+  });
+};
 
 const updateQuantity = (id: number, newQuantity: number) => {
   setCart((prevCart) => {
@@ -152,17 +149,14 @@ const updateQuantity = (id: number, newQuantity: number) => {
         }
     }
 
-    const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0)
-    const filteredProducts=products.filter((p)=> p.name.toLowerCase().includes(searchTerm.toLowerCase()))
+const totalItemsInCart = cart.length;
+const filteredProducts=products.filter((p)=> p.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
     const likedProducts = Array.isArray(products)
         ? products.filter((p) => likedIds.includes(p.id))
         : []
 
-    if (loading)
-        return (
-            <div className="p-8 text-center text-xl">Loading products...</div>
-        )
+   
 
     if (error && products.length === 0)
         return (

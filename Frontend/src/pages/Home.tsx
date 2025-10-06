@@ -1,5 +1,6 @@
-import React, { useState } from "react"
+
 import ProductCard from "../components/ProductCard"
+import Loading from "../logo/Loading"
 import type { Product } from "../types"
 
 interface HomeProps {
@@ -21,6 +22,10 @@ const Home: React.FC<HomeProps> = ({
   // const filteredProducts = products.filter((p) =>
   //   p.name.toLowerCase().includes(searchTerm.toLowerCase())
   // )
+   if (products.length === 0)
+        return (
+            <Loading/>
+        )
 
   return (
     <>
