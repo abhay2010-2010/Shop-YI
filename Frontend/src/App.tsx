@@ -21,6 +21,7 @@ function App(): React.ReactElement {
     const [likedIds, setLikedIds] = useState<number[]>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
+    const [searchTerm, setSearchTerm] = useState<string>("")
 
     useEffect(() => {
         const savedCart = localStorage.getItem("shoppingCart")
@@ -152,6 +153,7 @@ const updateQuantity = (id: number, newQuantity: number) => {
     }
 
     const totalItemsInCart = cart.reduce((sum, item) => sum + item.quantity, 0)
+    const filteredProducts=products.filter((p)=> p.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
     const likedProducts = Array.isArray(products)
         ? products.filter((p) => likedIds.includes(p.id))
@@ -171,7 +173,7 @@ const updateQuantity = (id: number, newQuantity: number) => {
 
     return (
         <div className="min-h-screen bg-gradient-to-r from-violet-50 to-slate-400">
-            <Navbar cartCount={totalItemsInCart} likedCount={likedIds.length}  />
+            <Navbar cartCount={totalItemsInCart} likedCount={likedIds.length} searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
             <div className="p-6 pt-24 container mx-auto">
                 <Routes>
@@ -180,7 +182,7 @@ const updateQuantity = (id: number, newQuantity: number) => {
                         path="/"
                         element={
                             <Home
-                                products={products}
+                                products={filteredProducts}
                                 likedIds={likedIds}
                                 addToCart={addToCart}
                                 toggleLike={toggleLike}

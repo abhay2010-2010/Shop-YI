@@ -55,6 +55,7 @@ const Checkout: React.FC<Props> = ({ cart, updateQuantity, handleCheckout }) => 
           <p className="text-gray-500">
             Add some awesome products from the home page to continue shopping.
           </p>
+          <button onClick={()=>window.history.back()}>Continue shopping...</button>
         </div>
       ) : (
         <div className="grid md:grid-cols-3 gap-8">

@@ -5,10 +5,13 @@ import Logo from "../logo/Logo"
 
 interface NavbarProps {
     cartCount: number
-    likedCount: number // Explicitly typed
+    likedCount: number
+    searchTerm: string
+    onSearchChange: (value: string) => void
+
 }
 
-const Navbar: React.FC<NavbarProps> = ({ cartCount, likedCount }) => {
+const Navbar: React.FC<NavbarProps> = ({ cartCount, likedCount,searchTerm,onSearchChange}) => {
     return (
         <header className="fixed top-0 left-0 right-0 bg-gradient-to-r from-indigo-400 to-cyan-400 shadow-md z-10">
             <div className="container mx-auto flex justify-between items-center p-4">
@@ -18,7 +21,15 @@ const Navbar: React.FC<NavbarProps> = ({ cartCount, likedCount }) => {
                     className="transition">
                     <Logo />
                 </Link>
-
+<div className="flex-grow max-w-md mx-4">
+          <input
+            type="text"
+            placeholder="Search for products..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+          />
+        </div>
                 <div className="flex space-x-4">
                     {/* LIKED BUTTON (Links to /liked route) */}
                     <Link

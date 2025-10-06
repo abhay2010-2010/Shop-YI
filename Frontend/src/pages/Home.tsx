@@ -15,12 +15,12 @@ const Home: React.FC<HomeProps> = ({
   addToCart,
   toggleLike
 }) => {
-  const [searchTerm, setSearchTerm] = useState("")
+  // const [searchTerm, setSearchTerm] = useState("")
 
-  // Filter products based on search
-  const filteredProducts = products.filter((p) =>
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  // // Filter products based on search
+  // const filteredProducts = products.filter((p) =>
+  //   p.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // )
 
   return (
     <>
@@ -29,22 +29,16 @@ const Home: React.FC<HomeProps> = ({
           Available Products
         </h1>
 
-        <input
-          type="text"
-          placeholder="Search for products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-64 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-        />
+       
       </div>
 
-      {filteredProducts.length === 0 ? (
+      {products.length === 0 ? (
         <p className="text-center text-gray-600 mt-10">
-          No products found matching "{searchTerm}".
+          No products found matching .
         </p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
